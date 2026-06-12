@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [master]
+    tags: [v*]
   pull_request:
     branches: [master]
 
@@ -10,8 +11,35 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y librime-dev libleveldb-dev
+      - name: Rust toolchain
+        run: rustup show
+      - name: cargo check
+        run: cargo check --workspace
+
+  test:
+    needs: [check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y librime-dev libleveldb-dev
+      - name: Rust toolchain
+        run: rustup show
+      - name: cargo test
+        run: cargo test --workspace
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -21,11 +49,40 @@ jobs:
       - name: Rust toolchain
         run: rustup show
 
-      - name: cargo check
-        run: cargo check --workspace
-
-      - name: cargo test
-        run: cargo test --workspace
-
-      - name: cargo build
+      - name: cargo build --release
         run: cargo build --release
+
+      - name: Archive binary
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          mkdir -p dist
+          cp target/release/ci dist/
+          cp contrib/ci-daemon.service dist/
+          cd dist
+          tar czf "../ci-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" ci ci-daemon.service
+          zip "../ci-v${VERSION}-x86_64-unknown-linux-gnu.zip" ci ci-daemon.service
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          git log --oneline --no-decorate $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD 2>/dev/null | cat >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ci ${{ github.ref_name }}
+          body: |
+            ## ci ${{ github.ref_name }}
+
+            ### Changes
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### Assets
+            - `ci-v*-x86_64-unknown-linux-gnu.tar.gz`
+            - `ci-v*-x86_64-unknown-linux-gnu.zip`
+          files: |
+            ci-v*.tar.gz
+            ci-v*.zip
