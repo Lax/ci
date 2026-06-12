@@ -1,0 +1,7 @@
+#@/db_name=luna_pinyin
+#@/user_id=test-device-1234
+# Rime user dictionary
+ni hao	你好	c=5 d=0 t=1700000000
+shi jie	世界	c=3 d=0 t=1700000001
+zhong guo	中国	c=8 d=0 t=1700000002
+ce shi	测试	c=2 d=0 t=1700000003

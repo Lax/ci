@@ -5,3 +5,4 @@ pub mod sync_cmd;
 pub mod scan;
 pub mod status;
 pub mod device;
+pub mod daemon;

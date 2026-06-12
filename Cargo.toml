@@ -3,12 +3,19 @@ name = "ci"
 version = "0.1.0"
 edition = "2021"
 
+[dev-dependencies]
+tempfile = "3"
+
 [dependencies]
 anyhow = "1.0.102"
 chrono = { version = "0.4.45", features = ["serde"] }
 clap = { version = "4.6.1", features = ["derive"] }
 env_logger = "0.11.10"
+jieba-rs = "0.7"
 git2 = "0.21.0"
+inotify = "0.11"
+rime-api = "0.12"
+librime-sys = "0.4"
 log = "0.4.32"
 regex = "1.12.4"
 serde = { version = "1.0.228", features = ["derive"] }

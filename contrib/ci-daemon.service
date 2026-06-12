@@ -1,0 +1,11 @@
+[Unit]
+Description=ci — personal word frequency daemon
+Documentation=https://github.com/Lax/ci
+
+[Service]
+ExecStart=%h/.cargo/bin/ci daemon --watch
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

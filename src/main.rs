@@ -2,6 +2,7 @@ mod adapter;
 mod cli;
 mod config;
 mod db;
+mod ffi;
 mod sync;
 
 use clap::{Parser, Subcommand};
@@ -30,6 +31,12 @@ enum Commands {
     Scan,
     /// Show statistics
     Status,
+    /// Run daemon (trigger-based auto sync)
+    Daemon {
+        /// Watch Rime directory for changes
+        #[arg(long)]
+        watch: bool,
+    },
     /// Manage devices
     Device {
         #[command(subcommand)]
@@ -61,9 +68,10 @@ fn main() -> anyhow::Result<()> {
         Commands::Sync => cli::sync_cmd::run(),
         Commands::Scan => cli::scan::run(),
         Commands::Status => cli::status::run(),
+        Commands::Daemon { watch } => cli::daemon::run(watch),
         Commands::Device { action } => match action {
             DeviceAction::List => cli::device::run_list(),
-            DeviceAction::Add { name: _ } => cli::device::run_add(),
+            DeviceAction::Add { name } => cli::device::run_add(&name),
         },
     }
 }

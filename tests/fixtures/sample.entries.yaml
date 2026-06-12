@@ -1,0 +1,18 @@
+version: 1
+device:
+  id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+  name: test-device
+  total_entries: 2
+entries:
+- code: ni hao
+  word: 你好
+  freq: 5
+  updated: 2026-01-01T00:00:00Z
+  prev: ~
+  source: Ime
+- code: shi jie
+  word: 世界
+  freq: 3
+  updated: 2026-01-01T00:00:00Z
+  prev: ~
+  source: Ime
